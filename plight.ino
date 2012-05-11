@@ -20,6 +20,7 @@ void setup() {
   pinMode(BUTTON_PIN, INPUT);
   strip.begin();
   clear();
+  green_light();
 }
 
 
@@ -65,7 +66,7 @@ void yellow_light()
 
 void loop() {
   static int yellow_started = 0;
-  static int was_yellow = 1;
+  static uint32_t current_state = GREEN;
 
   int button;
 
@@ -73,27 +74,23 @@ void loop() {
 
   if ( button )
   {
-    was_yellow = 0;
-    yellow_started = 0;
     red_light();
+    current_state = RED;
+    yellow_started = 0;
   }
-  else if ( ! was_yellow )
+  else if ( current_state == RED )
   {
-    if ( ! yellow_started )
-      yellow_started = millis();
-
+    yellow_started = millis();
+    yellow_light();
+    current_state = YELLOW;
+  }
+  else if ( current_state == YELLOW )
+  {
     if ( millis() - yellow_started >= 2500 )
     {
       yellow_started = 0;
-      was_yellow = 1;
+      green_light();
+      current_state = GREEN;
     }
-
-    yellow_light();
-  }
-  else 
-  {
-    green_light();
-    was_yellow = 1;
-    yellow_started = 0;
   }
 }
