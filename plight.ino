@@ -65,7 +65,7 @@ void yellow_light()
 
 
 void loop() {
-  static int yellow_started = 0;
+  static unsigned long yellow_started = 0;
   static uint32_t current_state = GREEN;
 
   int button;
@@ -86,7 +86,8 @@ void loop() {
   }
   else if ( current_state == YELLOW )
   {
-    if ( millis() - yellow_started >= 2500 )
+    // account for rollover
+    if ( millis() - yellow_started >= 2500 || millis() < yellow_started )
     {
       yellow_started = 0;
       green_light();
