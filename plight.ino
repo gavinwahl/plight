@@ -6,7 +6,7 @@
 #define CLOCK_PIN_A 8
 #define BUTTON_PIN 12
 
-#define STRIP_LENGTH 6
+#define STRIP_LENGTH 72
 #define ONE_LIGHT (STRIP_LENGTH/3)
 
 #define ALL_OFF 0x000000
@@ -21,6 +21,7 @@ void setup() {
   strip.begin();
   clear();
   green_light();
+  //Serial.begin(9600);
 }
 
 
@@ -64,13 +65,38 @@ void yellow_light()
 
 
 
+int fibs[] = {1, 1, 2, 3, 5};
+
 void loop() {
   static unsigned long yellow_started = 0;
   static uint32_t current_state = GREEN;
+  static int easteregg_stage = 0;
+  static unsigned long last_close = 0;
 
   int button;
 
   button = digitalRead(BUTTON_PIN);
+
+  if ( (current_state == GREEN || current_state == YELLOW) && button )
+  {
+    int desired_time = fibs[easteregg_stage] * 1000;
+    unsigned long timedelta = millis() - last_close;
+    if ( timedelta >= (desired_time - 900) && timedelta <= (desired_time + 900) )
+      easteregg_stage++;
+    else
+      easteregg_stage = 0;
+    last_close = millis();
+  }
+  if ( easteregg_stage == 5 )
+  {
+    set_light_color(0, GREEN);
+    set_light_color(1, GREEN);
+    set_light_color(2, GREEN);
+    strip.show();
+    delay(2000);
+    easteregg_stage = 0;
+  }
+
 
   if ( button )
   {
@@ -86,7 +112,7 @@ void loop() {
   }
   else if ( current_state == YELLOW )
   {
-    // account for rollover
+    // the second clause of the `||` is to account for rollover
     if ( millis() - yellow_started >= 2500 || millis() < yellow_started )
     {
       yellow_started = 0;
