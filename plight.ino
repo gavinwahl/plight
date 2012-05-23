@@ -2,26 +2,30 @@
 #include "SPI.h"
 #include "LPD8806.h"
 
-#define DATA_PIN_A 0
-#define CLOCK_PIN_A 8
-#define BUTTON_PIN 12
+#define DATA_PIN_A 4
+#define CLOCK_PIN_A 3
+#define SENSOR_DATA_PIN 5
+
 
 #define STRIP_LENGTH 72
 #define ONE_LIGHT (STRIP_LENGTH/3)
 
 #define ALL_OFF 0x000000
 #define RED 0x00ff00
-#define YELLOW 0xbfff00
+#define YELLOW 0x507f00 
 #define GREEN 0xff0000
 
 LPD8806 strip(STRIP_LENGTH, DATA_PIN_A, CLOCK_PIN_A);
 
+void green_light();
+void clear();
+void set_light_color(int light, uint32_t color);
+
 void setup() {
-  pinMode(BUTTON_PIN, INPUT);
+  pinMode(SENSOR_DATA_PIN, INPUT);
   strip.begin();
   clear();
   green_light();
-  //Serial.begin(9600);
 }
 
 
@@ -63,7 +67,10 @@ void yellow_light()
   strip.show();
 }
 
-
+int read_sensor()
+{
+  return ! digitalRead(SENSOR_DATA_PIN);
+}
 
 int fibs[] = {1, 1, 2, 3, 5};
 
@@ -75,7 +82,7 @@ void loop() {
 
   int button;
 
-  button = digitalRead(BUTTON_PIN);
+  button = read_sensor();
 
   if ( (current_state == GREEN || current_state == YELLOW) && button )
   {
